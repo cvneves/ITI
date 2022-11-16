@@ -202,7 +202,7 @@ void LZW::Decode(string input_filename, string output_filename)
 					{
 						// prev_str = inv_dict[curr_keyword];
 						prev_keyword = curr_keyword;
-						// cout << inv_dict[curr_keyword][0] << endl << endl << endl;
+						// cout << curr_keyword << " - " << inv_dict[curr_keyword][0] << endl;
 						output_file.write((const char*) &inv_dict[curr_keyword][0], sizeof(char));
 					}
 					else
@@ -222,9 +222,9 @@ void LZW::Decode(string input_filename, string output_filename)
 							inv_dict[(uint16_t) inv_dict.size()] = temp;
 							// cout << curr_keyword << " - " << inv_dict[curr_keyword] << endl;
 							output_file.write((const char*) inv_dict[curr_keyword].data(), inv_dict[curr_keyword].size());
-
-							prev_keyword = curr_keyword;
 						}
+
+						prev_keyword = curr_keyword;
 					}
 
 						curr_keyword = 0;
@@ -247,6 +247,9 @@ void LZW::Decode(string input_filename, string output_filename)
 
 			string prev_str = inv_dict[prev_keyword];
 
+			curr_keyword <<= (max_word_size - bits_read);
+			// cout << ToBitString(curr_keyword, max_word_size) << endl;
+
 			if (!inv_dict.count(curr_keyword))
 			{
 				string temp = prev_str + prev_str[0];
@@ -261,9 +264,6 @@ void LZW::Decode(string input_filename, string output_filename)
 				// cout << curr_keyword << " - " << inv_dict[curr_keyword] << endl;
 				output_file.write((const char*) inv_dict[curr_keyword].data(), inv_dict[curr_keyword].size());
 			}
-
-			curr_keyword <<= (max_word_size - bits_read);
-			// cout << ToBitString(curr_keyword, max_word_size) << endl;
 		}
 	}
 	else
