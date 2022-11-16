@@ -13,7 +13,7 @@ using namespace std;
 struct LZW {
 	vector<string> alphabet;
 	map<string, uint16_t> dict;
-	const int max_word_size;
+	int max_word_size;
 
 	void FillDictWithAlphabet()
 	{
@@ -60,6 +60,8 @@ void LZW::Encode(string input_filename, string output_filename)
 
 	if (input_file.is_open() && output_file.is_open())
 	{
+		output_file.write((const char*) &max_word_size, sizeof(char));
+
 		char curr_byte;
 		input_file.read(&curr_byte, sizeof(char));
 
@@ -155,35 +157,66 @@ void LZW::Encode(string input_filename, string output_filename)
 
 void LZW::Decode(string input_filename, string output_filename)
 {
-	// string line;
-	// ifstream input_file(input_filename, ios::binary);
-	// ofstream output_file(output_filename, ios::binary);
+	string line;
+	ifstream input_file(input_filename, ios::binary);
+	ofstream output_file(output_filename, ios::binary);
 
-	// if (input_file.is_open() && output_file.is_open())
-	// {
+	if (input_file.is_open() && output_file.is_open())
+	{
+		input_file.read((char*) &max_word_size, sizeof(char));
+		// cout << ToBitString(max_word_size, 8) << "\n";
 
-	// 	while (!input_file.eof())
-	// 	{
-	// 		char curr_byte;
 
-	// 		while (dict.count(curr_str) && !input_file.eof())
-	// 		{
-	// 			input_file.read(&curr_byte, sizeof(char));
+		int curr_keyword = 0;
+		int bits_read = 0;
 
-	// 			if (input_file.eof())
-	// 				break;
-	// 		}
-	// 	}
+		int bits_written = 0;
 
-	// }
-	// else
-	// {
-	// 	cout << "Error loading the file" << endl;
-	// }
+		char curr_byte;
 
-	// input_file.close();
-	// output_file.close();
+		while (!input_file.eof())
+		{
+			input_file.read(&curr_byte, sizeof(char));
 
+			if (input_file.eof())
+				break;
+
+			// cout << bits_read << "\n";
+			for (int bit = 8 - 1; bit >= 0; bit--)
+			{
+				if (bits_read == max_word_size)
+				{
+					cout << ToBitString(curr_keyword, max_word_size) << endl;
+					// cout << (char) curr_keyword << endl;
+					// output_file.write((const char*) &byte_to_write, sizeof(char));
+
+					curr_keyword = 0;
+					bits_read = 0;
+				}
+
+				curr_keyword <<= 1;
+				curr_keyword |= ((curr_byte >> bit) & 1);
+
+				bits_read++;
+			}
+		}
+
+		if (bits_read == max_word_size)
+		{
+			curr_keyword <<= (max_word_size - bits_read);
+			cout << ToBitString(curr_keyword, max_word_size) << endl;
+			// cout << (char) curr_keyword << endl;
+		}
+		// cout << bits_read << endl;
+
+	}
+	else
+	{
+		cout << "Error loading the file" << endl;
+	}
+
+	input_file.close();
+	output_file.close();
 }
 
 #endif
