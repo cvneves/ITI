@@ -236,7 +236,6 @@ void LZW::Decode(string input_filename, string output_filename)
 
 				bits_read++;
 			}
-
 		}
 
 		if (bits_read == max_word_size)
