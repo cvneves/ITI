@@ -7,12 +7,14 @@
 #include <string>
 #include <fstream>
 #include <algorithm>
+#include <unordered_set>
 
 using namespace std;
 
 struct LZW {
 	vector<string> alphabet;
 	map<string, uint16_t> dict;
+	map<uint16_t, string> inv_dict;
 	int max_word_size;
 
 	void FillDictWithAlphabet()
@@ -21,7 +23,9 @@ struct LZW {
 		{
 			string tmp;
 			tmp += (char) i;
+
 			dict[tmp] = i;
+			inv_dict[i] = tmp;
 		}
 	}
 
@@ -166,7 +170,6 @@ void LZW::Decode(string input_filename, string output_filename)
 		input_file.read((char*) &max_word_size, sizeof(char));
 		// cout << ToBitString(max_word_size, 8) << "\n";
 
-
 		int curr_keyword = 0;
 		int bits_read = 0;
 
@@ -174,6 +177,10 @@ void LZW::Decode(string input_filename, string output_filename)
 
 		char curr_byte;
 
+		string curr_str;
+		string prev_str;
+
+		int characters_read = 0;
 		while (!input_file.eof())
 		{
 			input_file.read(&curr_byte, sizeof(char));
@@ -186,7 +193,20 @@ void LZW::Decode(string input_filename, string output_filename)
 			{
 				if (bits_read == max_word_size)
 				{
-					cout << ToBitString(curr_keyword, max_word_size) << endl;
+					// cout << ToBitString(curr_keyword, max_word_size) << endl;
+					if (inv_dict.count(curr_keyword))
+					{
+						curr_str = inv_dict[curr_keyword];
+						cout << curr_str << endl;
+						if (characters_read > 0)
+						inv_dict[prev_str + curr_str[0]];
+
+						// for (auto &c : inv_dict[curr_keyword])
+						// {
+
+						// }
+					}
+
 					// cout << (char) curr_keyword << endl;
 					// output_file.write((const char*) &byte_to_write, sizeof(char));
 
@@ -199,6 +219,8 @@ void LZW::Decode(string input_filename, string output_filename)
 
 				bits_read++;
 			}
+
+			characters_read++;
 		}
 
 		if (bits_read == max_word_size)
