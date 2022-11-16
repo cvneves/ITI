@@ -212,14 +212,16 @@ void LZW::Decode(string input_filename, string output_filename)
 						if (!inv_dict.count(curr_keyword))
 						{
 							string temp = prev_str + prev_str[0];
-							inv_dict[(uint16_t) inv_dict.size()] = temp;
+							if ( inv_dict.size() < (1 << max_word_size) )
+								inv_dict[(uint16_t) inv_dict.size()] = temp;
 							// cout << curr_keyword << " - " << temp << endl;
 							output_file.write((const char*) temp.data(), temp.size());
 						}
 						else
 						{
 							string temp = prev_str + inv_dict[curr_keyword][0];
-							inv_dict[(uint16_t) inv_dict.size()] = temp;
+							if ( inv_dict.size() < (1 << max_word_size) )
+								inv_dict[(uint16_t) inv_dict.size()] = temp;
 							// cout << curr_keyword << " - " << inv_dict[curr_keyword] << endl;
 							output_file.write((const char*) inv_dict[curr_keyword].data(), inv_dict[curr_keyword].size());
 						}
@@ -252,14 +254,16 @@ void LZW::Decode(string input_filename, string output_filename)
 			if (!inv_dict.count(curr_keyword))
 			{
 				string temp = prev_str + prev_str[0];
-				inv_dict[(uint16_t) inv_dict.size()] = temp;
+				if ( inv_dict.size() < (1 << max_word_size) )
+					inv_dict[(uint16_t) inv_dict.size()] = temp;
 				// cout << curr_keyword << " - " << temp << endl;
 				output_file.write((const char*) temp.data(), temp.size());
 			}
 			else
 			{
 				string temp = prev_str + inv_dict[curr_keyword][0];
-				inv_dict[(uint16_t) inv_dict.size()] = temp;
+				if ( inv_dict.size() < (1 << max_word_size) )
+					inv_dict[(uint16_t) inv_dict.size()] = temp;
 				// cout << curr_keyword << " - " << inv_dict[curr_keyword] << endl;
 				output_file.write((const char*) inv_dict[curr_keyword].data(), inv_dict[curr_keyword].size());
 			}
