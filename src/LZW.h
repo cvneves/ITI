@@ -34,6 +34,9 @@ struct LZW {
 
 	void Encode(string input_filename, string output_filename);
 	void Decode(string input_filename, string output_filename);
+
+	void SaveModel(string model_filename);
+	void LoadModel(string model_filename);
 };
 
 string ToBitString(int num, int len)
@@ -276,6 +279,53 @@ void LZW::Decode(string input_filename, string output_filename)
 
 	input_file.close();
 	output_file.close();
+}
+
+void LZW::SaveModel(string model_filename)
+{
+	ofstream model_file(model_filename, ios::binary);
+
+	if (model_file.is_open())
+	{
+		model_file.write((char*) &max_word_size, sizeof(char));
+		int tmp = dict.size();
+		model_file.write((char*) &tmp, sizeof(char));
+
+		for (auto it = dict.begin(); it != dict.end(); ++it)
+		{
+			model_file.write((char*) &(it->second), sizeof(int));
+
+			int str_length = it->first.size();
+			model_file.write((char*) &(str_length), sizeof(int));
+
+			model_file.write((char*) it->first.data(), it->first.size());
+		}
+	}
+
+	model_file.close();
+}
+
+void LZW::LoadModel(string model_filename)
+{
+	ofstream model_file(model_filename, ios::binary);
+
+	if (model_file.is_open())
+	{
+		dict.clear();
+
+		while (true)
+		{
+			int pattern_length;
+			model_file.read(&curr_byte, sizeof(char));
+			model_file.read(&curr_byte, sizeof(char));
+			char* tmp_string[];
+
+			if (!model_file.eof())
+				break;
+		}
+	}
+
+	model_file.close();
 }
 
 #endif
