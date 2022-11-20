@@ -16,6 +16,7 @@ struct LZW {
 	map<string, uint16_t> dict;
 	map<uint16_t, string> inv_dict;
 	int max_word_size;
+	bool use_model = false;
 
 	void FillDictWithAlphabet()
 	{
@@ -31,6 +32,21 @@ struct LZW {
 
 	LZW() : max_word_size(8) { FillDictWithAlphabet(); }
 	LZW(int k) :  max_word_size(k) { FillDictWithAlphabet(); }
+
+	void PrintDict()
+	{
+		vector<pair<int, string>> temp_v;
+
+		for (auto it=dict.begin(); it!=dict.end(); ++it)
+		{
+			temp_v.push_back(make_pair(it->second, it->first));
+			// cout << (it->first) << " => " << it->second - 97 << endl;
+		}
+		sort(temp_v.begin(), temp_v.end());
+		cout << endl;
+		for (auto &v : temp_v)
+			cout << v.first << " => " << v.second << endl;
+	}
 
 	void Encode(string input_filename, string output_filename);
 	void Decode(string input_filename, string output_filename);
@@ -125,7 +141,7 @@ void LZW::Encode(string input_filename, string output_filename)
 				bits_written = 0;
 			}
 
-			if(!dict.count(curr_str) && dict.size() < (1 << max_word_size))
+			if(!use_model && !dict.count(curr_str) && dict.size() < (1 << max_word_size))
 				dict[curr_str] = dict.size();
 
 		}
@@ -138,17 +154,7 @@ void LZW::Encode(string input_filename, string output_filename)
 			output_file.write((const char*) &byte_to_write, sizeof(char));
 		}
 
-		// vector<pair<int, string>> temp_v;
-
-		// for (auto it=dict.begin(); it!=dict.end(); ++it)
-		// {
-		// 	temp_v.push_back(make_pair(it->second, it->first));
-		// 	// cout << (it->first) << " => " << it->second - 97 << endl;
-		// }
-		// sort(temp_v.begin(), temp_v.end());
-		// cout << endl;
-		// for (auto &v : temp_v)
-		// 	cout << v.first << " => " << v.second << endl;
+		// PrintDict();
 	}
 	else
 	{
@@ -287,9 +293,12 @@ void LZW::SaveModel(string model_filename)
 
 	if (model_file.is_open())
 	{
-		model_file.write((char*) &max_word_size, sizeof(char));
+		/* File structure:
+		 * <K> <total number of patterns>
+		 * <code> <code string length> <code string> ... (dict.size() times) */
+		model_file.write((char*) &max_word_size, sizeof(int));
 		int tmp = dict.size();
-		model_file.write((char*) &tmp, sizeof(char));
+		model_file.write((char*) &tmp, sizeof(int));
 
 		for (auto it = dict.begin(); it != dict.end(); ++it)
 		{
@@ -297,7 +306,6 @@ void LZW::SaveModel(string model_filename)
 
 			int str_length = it->first.size();
 			model_file.write((char*) &(str_length), sizeof(int));
-
 			model_file.write((char*) it->first.data(), it->first.size());
 		}
 	}
@@ -307,22 +315,42 @@ void LZW::SaveModel(string model_filename)
 
 void LZW::LoadModel(string model_filename)
 {
-	ofstream model_file(model_filename, ios::binary);
+	ifstream model_file(model_filename, ios::binary);
 
 	if (model_file.is_open())
 	{
+		use_model = true;
 		dict.clear();
 
-		while (true)
-		{
-			int pattern_length;
-			model_file.read(&curr_byte, sizeof(char));
-			model_file.read(&curr_byte, sizeof(char));
-			char* tmp_string[];
+		model_file.read((char*) &max_word_size, sizeof(int));
 
-			if (!model_file.eof())
-				break;
+		int dict_size;
+		model_file.read((char*) &dict_size, sizeof(int));
+
+
+		for (int i = 0; i < dict_size; i++)
+		{
+			int curr_code;
+			model_file.read((char*) &curr_code, sizeof(int));
+
+			int str_length;
+			model_file.read((char*) &str_length, sizeof(int));
+
+			char str_buffer[str_length];
+			model_file.read((char*) str_buffer, str_length);
+
+			string tmp_str;
+			for (int c = 0; c < str_length; c++)
+			{
+				// cout << (int) tmp_str[c];
+				tmp_str += str_buffer[c];
+			}
+			// cout << endl;
+
+			dict[tmp_str] = curr_code;
 		}
+
+		// PrintDict();
 	}
 
 	model_file.close();
