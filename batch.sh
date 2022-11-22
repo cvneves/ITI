@@ -63,7 +63,7 @@ done
 rm -rf model/*
 if ! [ "$(ls -A model/)" ]; then
 	echo "Generating models"
-	for k in {16..16}
+	for k in {12..12}
 	do
 		for category in train/*
 		do

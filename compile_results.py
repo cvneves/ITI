@@ -21,7 +21,7 @@ for line in f:
     
 f.close()
 
-for k in range(16, 16 + 1):
+for k in range(12, 12 + 1):
     for test in range(1, 64 + 1):
         best_cat = -1
         min_size = 9999999999999
@@ -35,7 +35,7 @@ for k in range(16, 16 + 1):
         predicted[k - 9][test - 1] = best_cat
 
 # print(predicted[0])
-print(predicted)
+# print(predicted)
 for k in range(0,1):
     correct = [1 if predicted[k][i] - 1 == i else 0 for i in range(0, len(predicted[k]))]
     acc = 0
