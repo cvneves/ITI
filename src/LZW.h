@@ -8,6 +8,7 @@
 #include <fstream>
 #include <algorithm>
 #include <unordered_set>
+#include <set>
 
 using namespace std;
 
@@ -80,10 +81,14 @@ void LZW::Encode(string input_filename, string output_filename)
 	string line;
 	ifstream input_file(input_filename, ios::binary);
 	ofstream output_file(output_filename, ios::binary);
+	int bytes_written = 0;
+
+	set<int> used_codewords;
 
 	if (input_file.is_open() && output_file.is_open())
 	{
 		output_file.write((const char*) &max_word_size, sizeof(char));
+		bytes_written++;
 
 		char curr_byte;
 		input_file.read(&curr_byte, sizeof(char));
@@ -110,6 +115,8 @@ void LZW::Encode(string input_filename, string output_filename)
 				curr_str += curr_byte;
 			}
 
+			used_codewords.insert(curr_keyword);
+
 			/* Output bits */
 			bool byte_written = false;
 			for (int bit = max_word_size - 1; bit >= 0; bit--) 
@@ -120,6 +127,7 @@ void LZW::Encode(string input_filename, string output_filename)
 				{
 					// cout << ToBitString((int) byte_to_write, 8);
 					output_file.write((const char*) &byte_to_write, sizeof(char));
+					bytes_written++;
 
 					byte_written = true;
 
@@ -136,6 +144,7 @@ void LZW::Encode(string input_filename, string output_filename)
 			{
 				// cout << ToBitString((int) byte_to_write, 8);
 				output_file.write((const char*) &byte_to_write, sizeof(char));
+				bytes_written++;
 
 				byte_to_write = 0;
 				bits_written = 0;
@@ -152,6 +161,7 @@ void LZW::Encode(string input_filename, string output_filename)
 
 			// cout << ToBitString((int) byte_to_write, 8);
 			output_file.write((const char*) &byte_to_write, sizeof(char));
+			bytes_written++;
 		}
 
 		// PrintDict();
@@ -161,6 +171,8 @@ void LZW::Encode(string input_filename, string output_filename)
 		cout << "Error loading the file" << endl;
 	}
 
+	cout << "Compressed file size: " << bytes_written << endl;
+	cout << "Used codewords: " << used_codewords.size() << endl;
 	input_file.close();
 	output_file.close();
 

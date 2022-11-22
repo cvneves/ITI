@@ -9,18 +9,19 @@ for k in range(9, 16 + 1):
 for line in f:
     temp = line.split(" ")
     temp[-1]=temp[-1][:-1]
+    temp[-2]=temp[-1][:-1]
 
     test_id = int(temp[0])
     model_id = int(temp[1])
     k = int(temp[2])
-    file_size = int(temp[3])
+    file_size = -int(temp[4])
     
     print(test_id, model_id, k, file_size)
     pred_dict[k][(test_id, model_id)] = file_size
     
 f.close()
 
-for k in range(9, 16 + 1):
+for k in range(16, 16 + 1):
     for test in range(1, 64 + 1):
         best_cat = -1
         min_size = 9999999999999
@@ -34,7 +35,8 @@ for k in range(9, 16 + 1):
         predicted[k - 9][test - 1] = best_cat
 
 # print(predicted[0])
-for k in range(0,8):
+print(predicted)
+for k in range(0,1):
     correct = [1 if predicted[k][i] - 1 == i else 0 for i in range(0, len(predicted[k]))]
     acc = 0
     for a in correct:
