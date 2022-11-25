@@ -87,7 +87,9 @@ void LZW::Encode(string input_filename, string output_filename)
 
 	if (input_file.is_open() && output_file.is_open())
 	{
+#ifdef WRITE_COMPRESSED_FILE_TO_DISK
 		output_file.write((const char*) &max_word_size, sizeof(char));
+#endif
 		bytes_written++;
 
 		char curr_byte;
@@ -126,7 +128,9 @@ void LZW::Encode(string input_filename, string output_filename)
 				if (bits_written == 8)
 				{
 					// cout << ToBitString((int) byte_to_write, 8);
+#ifdef WRITE_COMPRESSED_FILE_TO_DISK
 					output_file.write((const char*) &byte_to_write, sizeof(char));
+#endif
 					bytes_written++;
 
 					byte_written = true;
@@ -143,7 +147,9 @@ void LZW::Encode(string input_filename, string output_filename)
 			if (!byte_written && !bits_written)
 			{
 				// cout << ToBitString((int) byte_to_write, 8);
+#ifdef WRITE_COMPRESSED_FILE_TO_DISK
 				output_file.write((const char*) &byte_to_write, sizeof(char));
+#endif
 				bytes_written++;
 
 				byte_to_write = 0;
@@ -160,7 +166,9 @@ void LZW::Encode(string input_filename, string output_filename)
 			byte_to_write <<= (8 - bits_written);
 
 			// cout << ToBitString((int) byte_to_write, 8);
+#ifdef WRITE_COMPRESSED_FILE_TO_DISK
 			output_file.write((const char*) &byte_to_write, sizeof(char));
+#endif
 			bytes_written++;
 		}
 
