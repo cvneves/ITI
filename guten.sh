@@ -23,7 +23,7 @@ mkdir gutenberg/model
 rm -rf gutenberg/model/*
 
 echo "Generating models"
-for k in {16..16}
+for k in {9..16}
 do
 	for category in gutenberg/train/*
 	do
@@ -34,37 +34,40 @@ done
 echo "Compressing files from test set"
 mkdir gutenberg/results/
 rm -rf gutenberg/results/sizes.txt
-acc=0
-for individual in gutenberg/test/*
+for k in {9..16}
 do
-	min_compr_size=99999999999
-	best_model=9999999
-	for model in gutenberg/model/*
+	acc=0
+	for individual in gutenberg/test/*
 	do
-		./build/encode $individual output/dump 8 r $model > tmp
+		min_compr_size=99999999999
+		best_model=9999999
+		for model in gutenberg/model/*_$k
+		do
+			./build/encode $individual output/dump 8 r $model > tmp
 
-		# log compressed file size and used indices
-		basname=$(basename $individual)
-		test_name=$(echo $basname | cut -d "_" -f 1)
-		model_name=$(echo $(basename $model) | cut -d "." -f 1)
-		k=$(echo $model | cut -d "_" -f 2)
-		file_size=$(grep "Compressed file size: " tmp | awk '{print $4}')
-		used_codewords=$(grep "Used codewords: " tmp | awk '{print $3}')
+			# log compressed file size and used indices
+			basname=$(basename $individual)
+			test_name=$(echo $basname | cut -d "_" -f 1)
+			model_name=$(echo $(basename $model) | cut -d "." -f 1)
+			k=$(echo $model | cut -d "_" -f 2)
+			file_size=$(grep "Compressed file size: " tmp | awk '{print $4}')
+			used_codewords=$(grep "Used codewords: " tmp | awk '{print $3}')
 
-		echo $test_name $model_name $k $file_size $used_codewords >> gutenberg/results/sizes.txt
-		# echo $test_name $model_name $k $file_size $used_codewords
-		if ((-used_codewords < min_compr_size)); then
-			best_model=$model_name
-			((min_compr_size=-used_codewords))
-			# echo $min_compr_size
+			# echo $test_name $model_name $k $file_size $used_codewords >> gutenberg/results/sizes.txt
+			# echo $test_name $model_name $k $file_size $used_codewords
+			if ((-used_codewords < min_compr_size)); then
+				best_model=$model_name
+				((min_compr_size=-used_codewords))
+				# echo $min_compr_size
+			fi
+		done
+
+		if ((test_name==best_model)); then
+			acc=$(echo 0.1 + $acc | bc -l)
 		fi
 	done
 
-	if ((test_name==best_model)); then
-		acc=$(echo 0.1 + $acc | bc -l)
-	fi
+	echo k: $k Accuracy: $acc
 done
-
-echo Accuracy: $acc
 
 rm -rf tmp
