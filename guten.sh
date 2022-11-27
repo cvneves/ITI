@@ -121,7 +121,7 @@ set grid ls 100;
 set key at graph 0.95, 0.1;
 set key box lt -1 lw 2;
 plot 'data' using 1:2 title \"Tamanho do arquivo\" with lines ls 1 linewidth 4,
-'data' using 1:3 title \"Indices usados\" with lines linewidth 4"
+'data' using 1:3 title \"Indices usados\" with lp linewidth 4"
 
 rm -rf tmp
 # rm -rf data
