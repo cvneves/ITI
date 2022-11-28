@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(compress)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -DIL_STD -m64 -Wall -g -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -DIL_STD -m64 -Wall -g -O3 -DWRITE_COMPRESSED_FILE_TO_DISK")
 
 set(ENCODE_SRC_FILES
 	src/encode.cpp
